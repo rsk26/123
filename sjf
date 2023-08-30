@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+struct Process {
+    int pid;        // Process ID
+    int arrivalTime; // Arrival Time
+    int burstTime;   // Burst Time
+    bool completed;  // Completion flag
+};
+
+int findShortestJob(struct Process processes[], int numProcesses, int currentTime) {
+    int shortestJobIndex = -1;
+    int shortestJobBurst = -1;
+    
+    for (int i = 0; i < numProcesses; i++) {
+        if (!processes[i].completed && processes[i].arrivalTime <= currentTime) {
+            if (shortestJobIndex == -1 || processes[i].burstTime < shortestJobBurst) {
+                shortestJobIndex = i;
+                shortestJobBurst = processes[i].burstTime;
+            }
+        }
+    }
+    
+    return shortestJobIndex;
+}
+
+void sjf(struct Process processes[], int numProcesses) {
+    int currentTime = 0;
+    int completedProcesses = 0;
+    float totalTurnaroundTime = 0;
+    float totalWaitingTime = 0;
+    
+    printf("Process\tArrival Time\tBurst Time\tTurnaround Time\tWaiting Time\n");
+    
+    while (completedProcesses < numProcesses) {
+        int shortestJobIndex = findShortestJob(processes, numProcesses, currentTime);
+        
+        if (shortestJobIndex == -1) {
+            currentTime++;
+            continue;
+        }
+        
+        struct Process *currentProcess = &processes[shortestJobIndex];
+        
+        currentProcess->completed = true;
+        
+        int turnaroundTime = currentTime - currentProcess->arrivalTime + currentProcess->burstTime;
+        int waitingTime = currentTime - currentProcess->arrivalTime;
+        
+        totalTurnaroundTime += turnaroundTime;
+        totalWaitingTime += waitingTime;
+        
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n",
+               currentProcess->pid, currentProcess->arrivalTime,
+               currentProcess->burstTime, turnaroundTime, waitingTime);
+        
+        currentTime += currentProcess->burstTime;
+        completedProcesses++;
+    }
+    
+    float averageTurnaroundTime = totalTurnaroundTime / numProcesses;
+    float averageWaitingTime = totalWaitingTime / numProcesses;
+    
+    printf("Average Turnaround Time: %.2f\n", averageTurnaroundTime);
+    printf("Average Waiting Time: %.2f\n", averageWaitingTime);
+}
+
+int main() {
+    int numProcesses;
+    
+    printf("Enter the number of processes: ");
+    scanf("%d", &numProcesses);
+    
+    struct Process processes[numProcesses];
+    
+    for (int i = 0; i < numProcesses; i++) {
+        processes[i].pid = i + 1;
+        printf("Enter arrival time for Process %d: ", i + 1);
+        scanf("%d", &processes[i].arrivalTime);
+        printf("Enter burst time for Process %d: ", i + 1);
+        scanf("%d", &processes[i].burstTime);
+        processes[i].completed = false;
+    }
+    
+    sjf(processes, numProcesses);
+    
+    return 0;
+}
