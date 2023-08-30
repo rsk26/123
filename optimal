@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <limits.h>
+
+#define FRAME_SIZE 3
+
+// Function to check if a page is already in memory
+bool isInMemory(int page, int frames[], int numFrames) {
+    for (int i = 0; i < numFrames; i++) {
+        if (frames[i] == page) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Function to find the index of the page that will be used last in the future
+int findOptimalIndex(int pages[], int frames[], int numFrames, int currentIndex, int numPages) {
+    int optimalIndex = -1;
+    int farthestIndex = -1;
+
+    for (int i = 0; i < numFrames; i++) {
+        int j;
+        for (j = currentIndex + 1; j < numPages; j++) {
+            if (frames[i] == pages[j]) {
+                break;
+            }
+        }
+        if (j == numPages) {
+            return i;
+        }
+        if (j > farthestIndex) {
+            farthestIndex = j;
+            optimalIndex = i;
+        }
+    }
+
+    return optimalIndex;
+}
+
+// Function to perform Optimal Page Replacement
+int optimal(int pages[], int numPages) {
+    int frames[FRAME_SIZE];  // Frames to hold pages in memory
+    int pageFaults = 0;      // Count of page faults
+
+    for (int i = 0; i < numPages; i++) {
+        if (!isInMemory(pages[i], frames, FRAME_SIZE)) {
+            int optimalIndex = findOptimalIndex(pages, frames, FRAME_SIZE, i, numPages);
+            frames[optimalIndex] = pages[i];
+            pageFaults++;
+        }
+        printf("Page %d -> ", pages[i]);
+        for (int j = 0; j < FRAME_SIZE; j++) {
+            if (frames[j] == -1) {
+                printf(" ");
+            } else {
+                printf("%d", frames[j]);
+            }
+            if (j < FRAME_SIZE - 1) {
+                printf(" | ");
+            }
+        }
+        printf("\n");
+    }
+
+    return pageFaults;
+}
+
+int main() {
+    int numPages;
+
+    printf("Enter the number of pages: ");
+    scanf("%d", &numPages);
+
+    int pages[numPages];
+
+    printf("Enter the page reference sequence:\n");
+    for (int i = 0; i < numPages; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    int pageFaults = optimal(pages, numPages);
+
+    printf("\nTotal Page Faults: %d\n", pageFaults);
+
+    return 0;
+}
