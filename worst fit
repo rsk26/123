@@ -1,0 +1,57 @@
+#include <stdio.h>
+
+#define MEMORY_SIZE 100
+
+// Structure to represent a block of memory
+struct MemoryBlock {
+    int size;
+    int allocated;
+};
+
+// Function to allocate memory using Worst Fit algorithm
+void worstFit(struct MemoryBlock memory[], int numBlocks, int processSize) {
+    int worstFitIndex = -1;
+    
+    // Find the largest block that can accommodate the process
+    for (int i = 0; i < numBlocks; i++) {
+        if (!memory[i].allocated && memory[i].size >= processSize) {
+            if (worstFitIndex == -1 || memory[i].size > memory[worstFitIndex].size) {
+                worstFitIndex = i;
+            }
+        }
+    }
+    
+    // Allocate memory if a suitable block is found
+    if (worstFitIndex != -1) {
+        memory[worstFitIndex].allocated = 1;
+        printf("Allocated %d units of memory from block %d\n", processSize, worstFitIndex);
+    } else {
+        printf("No memory block found for allocating %d units of memory\n", processSize);
+    }
+}
+
+int main() {
+    struct MemoryBlock memory[MEMORY_SIZE];
+    
+    // Initialize memory blocks
+    for (int i = 0; i < MEMORY_SIZE; i++) {
+        memory[i].size = rand() % 50 + 10; // Random block sizes between 10 and 59
+        memory[i].allocated = 0;
+    }
+    
+    // Simulate allocation requests
+    int numAllocationRequests = 5;
+    int allocationSizes[] = {15, 30, 25, 20, 40}; // Sizes of processes
+    
+    for (int i = 0; i < numAllocationRequests; i++) {
+        printf("Allocation request for %d units of memory:\n", allocationSizes[i]);
+        worstFit(memory, MEMORY_SIZE, allocationSizes[i]);
+        printf("Memory status after allocation:\n");
+        for (int j = 0; j < MEMORY_SIZE; j++) {
+            printf("Block %d - Size: %d, Allocated: %s\n", j, memory[j].size, memory[j].allocated ? "Yes" : "No");
+        }
+        printf("\n");
+    }
+    
+    return 0;
+}
