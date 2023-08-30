@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define FRAME_SIZE 3
+
+// Function to check if a page is already in memory
+bool isInMemory(int page, int frames[], int numFrames) {
+    for (int i = 0; i < numFrames; i++) {
+        if (frames[i] == page) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Function to perform FIFO page replacement
+int fifo(int pages[], int numPages) {
+    int frames[FRAME_SIZE];  // Frames to hold pages in memory
+    int front = 0;           // Index of the oldest page in memory
+    int pageFaults = 0;      // Count of page faults
+    
+    for (int i = 0; i < numPages; i++) {
+        if (!isInMemory(pages[i], frames, FRAME_SIZE)) {
+            frames[front] = pages[i];  // Replace the oldest page
+            front = (front + 1) % FRAME_SIZE;
+            pageFaults++;
+        }
+        printf("Page %d -> ", pages[i]);
+        for (int j = 0; j < FRAME_SIZE; j++) {
+            if (frames[j] == -1) {
+                printf(" ");
+            } else {
+                printf("%d", frames[j]);
+            }
+            if (j < FRAME_SIZE - 1) {
+                printf(" | ");
+            }
+        }
+        printf("\n");
+    }
+    
+    return pageFaults;
+}
+
+int main() {
+    int numPages;
+    
+    printf("Enter the number of pages: ");
+    scanf("%d", &numPages);
+    
+    int pages[numPages];
+    
+    printf("Enter the page reference sequence:\n");
+    for (int i = 0; i < numPages; i++) {
+        scanf("%d", &pages[i]);
+    }
+    
+    int pageFaults = fifo(pages, numPages);
+    
+    printf("\nTotal Page Faults: %d\n", pageFaults);
+    
+    return 0;
+}
