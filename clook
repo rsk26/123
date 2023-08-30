@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to calculate absolute value
+int abs(int x) {
+    return x >= 0 ? x : -x;
+}
+
+// Function to find the index of the shortest seek time
+int findShortestIndex(int requestQueue[], int numRequests, int currentPosition) {
+    int shortestDistance = abs(requestQueue[0] - currentPosition);
+    int shortestIndex = 0;
+
+    for (int i = 1; i < numRequests; i++) {
+        int distance = abs(requestQueue[i] - currentPosition);
+        if (distance < shortestDistance) {
+            shortestDistance = distance;
+            shortestIndex = i;
+        }
+    }
+
+    return shortestIndex;
+}
+
+// SSTF disk scheduling function
+void sstf(int requestQueue[], int numRequests, int initialPosition) {
+    int totalSeekTime = 0;
+    int currentPosition = initialPosition;
+
+    printf("Disk Head Movement:\n");
+
+    for (int i = 0; i < numRequests; i++) {
+        int shortestIndex = findShortestIndex(requestQueue, numRequests, currentPosition);
+        int nextRequest = requestQueue[shortestIndex];
+        totalSeekTime += abs(nextRequest - currentPosition);
+
+        printf("%d -> ", nextRequest);
+
+        // Remove the serviced request from the queue
+        for (int j = shortestIndex; j < numRequests - 1; j++) {
+            requestQueue[j] = requestQueue[j + 1];
+        }
+        numRequests--;
+
+        currentPosition = nextRequest;
+    }
+
+    printf("\nTotal Seek Time: %d\n", totalSeekTime);
+    printf("Average Seek Time: %.2f\n", (float)totalSeekTime / (float)numRequests);
+}
+
+int main() {
+    int numRequests;
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &numRequests);
+
+    int requestQueue[numRequests];
+    printf("Enter the disk requests: ");
+    for (int i = 0; i < numRequests; i++) {
+        scanf("%d", &requestQueue[i]);
+    }
+
+    int initialPosition;
+    printf("Enter the initial position of the disk head: ");
+    scanf("%d", &initialPosition);
+
+    sstf(requestQueue, numRequests, initialPosition);
+
+    return 0;
+}
