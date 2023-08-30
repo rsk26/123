@@ -1,0 +1,60 @@
+#include <stdio.h>
+
+struct Process {
+    int pid;        // Process ID
+    int arrivalTime; // Arrival Time
+    int burstTime;   // Burst Time
+};
+
+void fcfs(struct Process processes[], int numProcesses) {
+    int currentTime = 0;
+    float totalTurnaroundTime = 0;
+    float totalWaitingTime = 0;
+    
+    printf("Process\tArrival Time\tBurst Time\tTurnaround Time\tWaiting Time\n");
+    
+    for (int i = 0; i < numProcesses; i++) {
+        if (currentTime < processes[i].arrivalTime) {
+            currentTime = processes[i].arrivalTime;
+        }
+        
+        int turnaroundTime = currentTime - processes[i].arrivalTime + processes[i].burstTime;
+        int waitingTime = currentTime - processes[i].arrivalTime;
+        
+        totalTurnaroundTime += turnaroundTime;
+        totalWaitingTime += waitingTime;
+        
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n",
+               processes[i].pid, processes[i].arrivalTime,
+               processes[i].burstTime, turnaroundTime, waitingTime);
+        
+        currentTime += processes[i].burstTime;
+    }
+    
+    float averageTurnaroundTime = totalTurnaroundTime / numProcesses;
+    float averageWaitingTime = totalWaitingTime / numProcesses;
+    
+    printf("Average Turnaround Time: %.2f\n", averageTurnaroundTime);
+    printf("Average Waiting Time: %.2f\n", averageWaitingTime);
+}
+
+int main() {
+    int numProcesses;
+    
+    printf("Enter the number of processes: ");
+    scanf("%d", &numProcesses);
+    
+    struct Process processes[numProcesses];
+    
+    for (int i = 0; i < numProcesses; i++) {
+        processes[i].pid = i + 1;
+        printf("Enter arrival time for Process %d: ", i + 1);
+        scanf("%d", &processes[i].arrivalTime);
+        printf("Enter burst time for Process %d: ", i + 1);
+        scanf("%d", &processes[i].burstTime);
+    }
+    
+    fcfs(processes, numProcesses);
+    
+    return 0;
+}
