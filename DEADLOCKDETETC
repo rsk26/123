@@ -1,67 +1,105 @@
-#include<stdio.h>
-#include<stdlib.h>
-
-int mutex=1,full=0,empty=3,x=0;
-
+#include <stdio.h>
+#include<stdbool.h>
 int main()
 {
-    int n;
-    void producer();
-    void consumer();
-    int wait(int);
-    int signal(int);
-    printf("\n1.Producer\n2.Consumer\n3.Exit");
-    while(1)
-    {
-        printf("\nEnter your choice:");
-        scanf("%d",&n);
-        switch(n)
+
+
+	int n, m, i, j, k, l;
+	printf("\nEnter no. of process: ");
+	scanf("%d",&n);
+	printf("\nEnter no. of resources: ");
+	scanf("%d",&m);
+	int alloc[n][m],request[n][m],avail[m];
+	
+	
+	printf("\nEnter allocation matrix\n");
+	for (i = 0; i < n; i++)
+	{
+        for (j = 0; j < m; j++)
         {
-            case 1:    if((mutex==1)&&(empty!=0))
-                        producer();
-                    else
-                        printf("Buffer is full!!");
-                    break;
-            case 2:    if((mutex==1)&&(full!=0))
-                        consumer();
-                    else
-                        printf("Buffer is empty!!");
-                    break;
-            case 3:
-                    exit(0);
-                    break;
+            scanf("%d", &alloc[i][j]);
+        }
+
+	}
+	printf("\nEnter request matrix\n");
+
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < m; j++) {
+            scanf("%d", &request[i][j]);
         }
     }
 
-    return 0;
-}
+	printf("\nEnter available resource vector: ");
 
-int wait(int s)
-{
-    return (--s);
-}
+	int work[m];
+	bool finish[n];
 
-int signal(int s)
-{
-    return(++s);
-}
+    for (j = 0; j < m; j++)
+    {
+        scanf("%d", &avail[j]);
+        work[j]=avail[j];
+    }
 
-void producer()
-{
-    mutex=wait(mutex);
-    full=signal(full);
-    empty=wait(empty);
-    x++;
-    printf("\nProducer produces the item %d",x);
-    mutex=signal(mutex);
-}
+    for(i=0;i<n;i++)
+    {
+        finish[i] = true;
+        for(j=0;j<n;j++)
+        {
+            if(alloc[i][j]!=0)
+            {
+                finish[i]= false;
+                break;
+            }
+        }
+    }
+    int res[n], y=0;
+    
+    for(k=0;k<n;k++)
+    {
+        for(i=0;i<n;i++)
+        {
+            if(!finish[i])
+            {
+                int flag=1;
+                for(j=0;j<m;j++)
+                {
+                    if(request[i][j]>work[j])
+                    {
+                        flag=0;
+                        break;
+                    }
+                }
+            
+                if(flag)
+                {
+                    for(l=0;l<m;l++)
+                    {
+                        work[l] += alloc[i][l];
+                    }
+                    finish[i] = true;
+                    res[y++] = i;
+                }
+            }
+        }
+        
+    }
+    int x=0;
+    for(i=0;i<n;i++)
+    {
+        if(finish[i]==false)
+            printf("\nSystem is in Deadlock, P%d is the deadlocked process\n", i);
+        
+        else
+            x++;
+    }
+    if(x==n)
+    {
+        printf("\nNo Deadlock!!\nSafe sequence: ");
+       
+        for(i=0;i<n;i++)
+            printf("P%d,  ", res[i]);
+        printf("\n");
+    }
 
-void consumer()
-{
-    mutex=wait(mutex);
-    full=wait(full);
-    empty=signal(empty);
-    printf("\nConsumer consumes item %d",x);
-    x--;
-    mutex=signal(mutex);
+	return 0;
 }
